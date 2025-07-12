@@ -58,6 +58,7 @@ const AppContent: React.FC = () => {
             <Route path="/goals" element={<Goals />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>

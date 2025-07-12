@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, User, Phone, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,10 +11,16 @@ const Auth: React.FC = () => {
     email: '',
     password: '',
   });
-  const [error, setError] = useState('');
+  const location = useLocation();
+  const urlError = new URLSearchParams(location.search).get('error');
+  const [error, setError] = useState(urlError || '');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { signIn, signUp, signInWithGoogle } = useAuth();
+
+  useEffect(() => {
+    setError(urlError || '');
+  }, [urlError]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -31,13 +37,26 @@ const Auth: React.FC = () => {
     try {
       if (isLogin) {
         await signIn(formData.email, formData.password);
-        navigate('/dashboard');
       } else {
         await signUp(formData.email, formData.password);
-        navigate('/dashboard');
       }
+      navigate('/dashboard');
     } catch (error: any) {
-      setError(error.message || 'An error occurred');
+      let message = 'An error occurred. Please try again.';
+      if (error.code === 'auth/user-not-found') {
+        message = 'No user found with this email.';
+      } else if (error.code === 'auth/wrong-password') {
+        message = 'Incorrect password.';
+      } else if (error.code === 'auth/email-already-in-use') {
+        message = 'This email is already registered.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Invalid email address.';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Password should be at least 6 characters.';
+      } else if (error.message) {
+        message = error.message;
+      }
+      navigate(`/auth?error=${encodeURIComponent(message)}`);
     } finally {
       setIsLoading(false);
     }
@@ -132,10 +151,14 @@ const Auth: React.FC = () => {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-error-500/10 border border-error-500/20 rounded-xl text-white flex items-center gap-2">
-              <AlertCircle size={18} />
-              <span>{error}</span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-red-600/90 border border-red-700 rounded-xl text-white flex items-center gap-2 shadow-lg"
+            >
+              <AlertCircle size={20} className="text-white" />
+              <span className="font-semibold">{error}</span>
+            </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
