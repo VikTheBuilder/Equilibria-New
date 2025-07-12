@@ -18,6 +18,13 @@ interface JournalEntry {
   mood?: string;
   category?: string;
   wordCount: number;
+  aiAnalysis?: {
+    summary: string;
+    moodRating: number;
+    moodLabel: string;
+    keyThemes: string[];
+    insights: string;
+  };
   createdAt?: any;
   updatedAt?: any;
 }
@@ -167,6 +174,13 @@ export const journalAPI = {
     content: string;
     mood?: string;
     category?: string;
+    aiAnalysis?: {
+      summary: string;
+      moodRating: number;
+      moodLabel: string;
+      keyThemes: string[];
+      insights: string;
+    };
   }) {
     try {
       const wordCount = entryData.content.split(/\s+/).filter(word => word.length > 0).length;

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Image, List, Bold, Italic, Link as LinkIcon, Smile, Frown, Meh } from 'lucide-react';
+import { Save, Image, List, Bold, Italic, Link as LinkIcon, Smile, Frown, Meh, Brain, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { journalAPI } from '../lib/api';
+import { geminiService } from '../lib/geminiService';
 import { useNavigate } from 'react-router-dom';
 
 const Write: React.FC = () => {
@@ -11,7 +12,15 @@ const Write: React.FC = () => {
   const [mood, setMood] = useState('');
   const [category, setCategory] = useState('Personal');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState('');
+  const [aiAnalysis, setAiAnalysis] = useState<{
+    summary: string;
+    moodRating: number;
+    moodLabel: string;
+    keyThemes: string[];
+    insights: string;
+  } | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -30,15 +39,27 @@ const Write: React.FC = () => {
     }
 
     setIsLoading(true);
+    setIsAnalyzing(true);
     setError('');
 
     try {
+      // Analyze the content with AI
+      let analysis = null;
+      try {
+        analysis = await geminiService.analyzeJournalEntry(content.trim());
+        setAiAnalysis(analysis);
+      } catch (aiError) {
+        console.error('AI analysis failed:', aiError);
+        // Continue without AI analysis if it fails
+      }
+
       await journalAPI.createEntry({
         userId: user.id,
         title: title.trim(),
         content: content.trim(),
         mood,
         category,
+        aiAnalysis: analysis,
       });
 
       // Reset form
@@ -46,6 +67,7 @@ const Write: React.FC = () => {
       setContent('');
       setMood('');
       setCategory('Personal');
+      setAiAnalysis(null);
 
       // Navigate to entries page
       navigate('/entries');
@@ -54,6 +76,7 @@ const Write: React.FC = () => {
       setError('Failed to save entry. Please try again.');
     } finally {
       setIsLoading(false);
+      setIsAnalyzing(false);
     }
   };
 
@@ -73,8 +96,8 @@ const Write: React.FC = () => {
             disabled={isLoading || !title.trim() || !content.trim()}
             className="btn btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Save size={18} />
-            {isLoading ? 'Saving...' : 'Save Entry'}
+            {isAnalyzing ? <Brain size={18} className="animate-pulse" /> : <Save size={18} />}
+            {isAnalyzing ? 'Analyzing...' : isLoading ? 'Saving...' : 'Save Entry'}
           </button>
         </div>
 

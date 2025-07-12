@@ -1,14 +1,25 @@
-# Chatbot Setup Guide
+# AI Integration Setup Guide
 
 ## Overview
-The Equilibria Dashboard now includes an AI-powered chatbot that uses Google's Gemini API to provide intelligent assistance to users.
+The Equilibria Dashboard now includes AI-powered features using Google's Gemini API:
+- **Chatbot**: Intelligent assistant for dashboard help and productivity tips
+- **Journal Analysis**: Automatic analysis of journal entries with summaries, mood ratings, and insights
 
 ## Features
+
+### Chatbot
 - 🤖 AI-powered conversations using Gemini API
 - 💬 Real-time chat interface with smooth animations
 - 🎨 Modern UI that matches the dashboard design
 - 📱 Responsive design that works on all devices
 - ⚡ Fast and efficient message handling
+
+### Journal Analysis
+- 📝 Automatic text analysis when saving journal entries
+- 🧠 AI-generated summaries and insights
+- 😊 Mood rating and emotional analysis (1-10 scale)
+- 🏷️ Key themes extraction from entries
+- 📊 Detailed analysis view in journal entries
 
 ## Setup Instructions
 
@@ -33,18 +44,16 @@ npm run dev
 
 ## How to Use
 
-### Opening the Chatbot
-- Click the floating chat button (message circle icon) in the bottom-right corner of the dashboard
-- The chatbot will open with a smooth animation
+### Chatbot
+- **Opening**: Click the floating chat button (message circle icon) in the bottom-right corner of the dashboard
+- **Chatting**: Type your message and press Enter or click send
+- **Closing**: Click the X button or click outside the chatbot window
 
-### Chatting with the AI
-- Type your message in the input field
-- Press Enter or click the send button
-- The AI will respond with helpful information about your productivity dashboard
-
-### Closing the Chatbot
-- Click the X button in the top-right corner of the chatbot
-- Or click outside the chatbot window
+### Journal Analysis
+- **Writing**: Create a new journal entry in the Write page
+- **Analysis**: When you click "Save Entry", the AI will automatically analyze your text
+- **Viewing**: See the analysis in the journal entries list with mood ratings, summaries, and themes
+- **Details**: Click the eye icon on any entry to view the full AI analysis in a detailed modal
 
 ## Example Conversations
 

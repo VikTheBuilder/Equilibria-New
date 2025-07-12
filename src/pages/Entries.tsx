@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Calendar, Tag, Edit, Trash2, Eye } from 'lucide-react';
+import { Search, Filter, Calendar, Tag, Edit, Trash2, Eye, Brain, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { journalAPI } from '../lib/api';
+import { geminiService } from '../lib/geminiService';
+import EntryDetailModal from '../components/EntryDetailModal';
 
 interface JournalEntry {
   id: string;
@@ -11,6 +13,13 @@ interface JournalEntry {
   mood?: string;
   category?: string;
   wordCount: number;
+  aiAnalysis?: {
+    summary: string;
+    moodRating: number;
+    moodLabel: string;
+    keyThemes: string[];
+    insights: string;
+  };
   createdAt: Date;
 }
 
@@ -21,6 +30,8 @@ const Entries: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
 
   const categories = ['all', 'Personal', 'Work', 'Goals', 'Reflection', 'Gratitude', 'Dreams'];
@@ -58,6 +69,16 @@ const Entries: React.FC = () => {
     } catch (error) {
       console.error('Error deleting entry:', error);
     }
+  };
+
+  const handleViewEntry = (entry: JournalEntry) => {
+    setSelectedEntry(entry);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedEntry(null);
   };
 
   const filteredEntries = entries.filter(entry => {
@@ -167,11 +188,18 @@ const Entries: React.FC = () => {
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     {entry.title}
-                    {entry.mood && <span className="text-lg">{getMoodEmoji(entry.mood)}</span>}
+                    {entry.aiAnalysis ? (
+                      <span className="text-lg">{geminiService.getMoodEmoji(entry.aiAnalysis.moodLabel)}</span>
+                    ) : entry.mood && (
+                      <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
+                    )}
                   </h3>
                   
                   <div className="flex items-center gap-2">
-                    <button className="p-1 rounded hover:bg-surface-100 dark:hover:bg-surface-700">
+                    <button 
+                      onClick={() => handleViewEntry(entry)}
+                      className="p-1 rounded hover:bg-surface-100 dark:hover:bg-surface-700"
+                    >
                       <Eye size={16} />
                     </button>
                     <button className="p-1 rounded hover:bg-surface-100 dark:hover:bg-surface-700">
@@ -185,6 +213,48 @@ const Entries: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                
+                {/* AI Analysis Section */}
+                {entry.aiAnalysis && (
+                  <div className="mb-4 p-3 bg-gradient-to-r from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Brain size={16} className="text-primary-500" />
+                      <span className="text-sm font-medium text-primary-700 dark:text-primary-300">AI Analysis</span>
+                      <div className="flex items-center gap-1 ml-auto">
+                        <span className={`text-sm font-medium ${geminiService.getMoodColor(entry.aiAnalysis.moodRating)}`}>
+                          {entry.aiAnalysis.moodRating}/10
+                        </span>
+                        <span className="text-sm text-surface-600 dark:text-surface-400">
+                          {entry.aiAnalysis.moodLabel}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-surface-700 dark:text-surface-300 mb-2">
+                      <strong>Summary:</strong> {entry.aiAnalysis.summary}
+                    </p>
+                    
+                    {entry.aiAnalysis.keyThemes.length > 0 && (
+                      <div className="mb-2">
+                        <span className="text-sm font-medium text-surface-600 dark:text-surface-400">Key Themes: </span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {entry.aiAnalysis.keyThemes.map((theme, index) => (
+                            <span 
+                              key={index}
+                              className="px-2 py-1 text-xs bg-surface-200 dark:bg-surface-700 rounded-full text-surface-700 dark:text-surface-300"
+                            >
+                              {theme}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <p className="text-sm text-surface-600 dark:text-surface-400">
+                      <strong>Insight:</strong> {entry.aiAnalysis.insights}
+                    </p>
+                  </div>
+                )}
                 
                 <p className="text-surface-600 dark:text-surface-400 mb-4 line-clamp-3">
                   {entry.content.substring(0, 200)}
@@ -231,6 +301,13 @@ const Entries: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Entry Detail Modal */}
+      <EntryDetailModal
+        entry={selectedEntry}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };
