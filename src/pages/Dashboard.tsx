@@ -5,6 +5,8 @@ import MetricsPanel from '../components/dashboard/MetricsPanel';
 import AnalyticsPanel from '../components/dashboard/AnalyticsPanel';
 import ActivityPanel from '../components/dashboard/ActivityPanel';
 import ProjectsPanel from '../components/dashboard/ProjectsPanel';
+import Chatbot from '../components/Chatbot';
+import ChatButton from '../components/ChatButton';
 import { Clock, Trophy, Target, TrendingUp, PenTool, DollarSign, GraduationCap, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { dashboardAPI } from '../lib/api';
@@ -40,6 +42,7 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -306,6 +309,10 @@ const Dashboard: React.FC = () => {
           <ActivityPanel />
         </motion.div>
       </div>
+      
+      {/* Chatbot Components */}
+      <ChatButton onClick={() => setIsChatbotOpen(true)} />
+      <Chatbot isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} />
     </div>
   );
 };
