@@ -1,15 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { User, Bell, Moon, Shield, Globe, HelpCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Settings: React.FC = () => {
+  const { user } = useAuth();
+  const displayName = user?.displayName || user?.email || 'User';
+  const email = user?.email || '';
+  const photoURL = user?.photoURL;
+
   const settingsSections = [
     {
       title: 'Profile',
       icon: User,
       settings: [
-        { name: 'Name', value: 'John Doe' },
-        { name: 'Email', value: 'john@example.com' },
+        { name: 'Name', value: displayName },
+        { name: 'Email', value: email },
         { name: 'Bio', value: 'Writer and creative thinker' },
       ]
     },

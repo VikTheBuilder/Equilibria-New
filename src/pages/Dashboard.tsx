@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await dashboardAPI.getDashboardData(user.id);
+      const data = await dashboardAPI.getDashboardData(user.uid);
       setDashboardData(data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{getGreeting()}, {user?.firstName}</h1>
+            <h1 className="text-3xl font-bold mb-2">{getGreeting()}, {user?.displayName || user?.email || 'User'}</h1>
             <p className="text-surface-600 dark:text-surface-400 flex items-center gap-2">
               <Clock size={16} />
               <span>Welcome back to your productivity dashboard</span>

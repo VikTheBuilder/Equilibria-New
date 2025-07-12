@@ -10,10 +10,6 @@ const Auth: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    firstName: '',
-    lastName: '',
-    phoneNumber: '',
-    dateOfBirth: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,17 +33,7 @@ const Auth: React.FC = () => {
         await signIn(formData.email, formData.password);
         navigate('/dashboard');
       } else {
-        // Validate required fields for signup
-        if (!formData.firstName || !formData.lastName) {
-          throw new Error('First name and last name are required');
-        }
-        
-        await signUp(formData.email, formData.password, {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phoneNumber: formData.phoneNumber,
-          dateOfBirth: formData.dateOfBirth,
-        });
+        await signUp(formData.email, formData.password);
         navigate('/dashboard');
       }
     } catch (error: any) {
@@ -153,65 +139,7 @@ const Auth: React.FC = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60\" size={20} />
-                    <input
-                      type="text"
-                      name="firstName"
-                      placeholder="First name"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                      required={!isLogin}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
-                    <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Last name"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                      required={!isLogin}
-                      disabled={isLoading}
-                    />
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    placeholder="Phone number (optional)"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    placeholder="Date of birth (optional)"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                    disabled={isLoading}
-                  />
-                </div>
-              </>
-            )}
-
+            {/* Only show email and password fields for both login and signup */}
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
               <input
@@ -225,7 +153,6 @@ const Auth: React.FC = () => {
                 disabled={isLoading}
               />
             </div>
-
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
               <input
@@ -246,7 +173,6 @@ const Auth: React.FC = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-
             <button
               type="submit"
               disabled={isLoading}
