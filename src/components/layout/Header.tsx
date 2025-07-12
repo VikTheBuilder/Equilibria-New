@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bell, Search, Menu, X, Moon, Sun, Settings, HelpCircle, User } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useSidebar } from '../../context/SidebarContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface HeaderProps {
@@ -10,6 +11,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
   const { theme, toggleTheme } = useTheme();
+  const { isCollapsed } = useSidebar();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -32,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
           
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-600 text-white font-bold">E</div>
-            <h1 className="text-xl font-semibold tracking-tight">Equilibria</h1>
+            <h1 className="text-xl font-semibold tracking-tight ml-2">Equilibria</h1>
           </div>
         </div>
 

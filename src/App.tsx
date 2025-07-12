@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SidebarProvider, useSidebar } from './context/SidebarContext';
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './pages/Dashboard';
@@ -16,12 +17,8 @@ import Academic from './pages/Academic';
 import Landing from './pages/Landing';
 
 const AppContent: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user, loading } = useAuth();
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const { isSidebarOpen, toggleSidebar, isCollapsed } = useSidebar();
 
   if (loading) {
     return (
@@ -51,7 +48,7 @@ const AppContent: React.FC = () => {
       <div className="flex-1 flex">
         <Sidebar isOpen={isSidebarOpen} />
         
-        <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
+        <main className={`flex-1 transition-all duration-150 ease-in-out ${isSidebarOpen ? (isCollapsed ? 'lg:ml-16' : 'lg:ml-64') : 'lg:ml-16'}`}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -75,7 +72,9 @@ function App() {
     <Router>
       <AuthProvider>
         <ThemeProvider>
-          <AppContent />
+          <SidebarProvider>
+            <AppContent />
+          </SidebarProvider>
         </ThemeProvider>
       </AuthProvider>
     </Router>
