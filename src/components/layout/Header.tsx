@@ -3,6 +3,8 @@ import { Bell, Search, Menu, X, Moon, Sun, Settings, HelpCircle, User } from 'lu
 import { useTheme } from '../../context/ThemeContext';
 import { useSidebar } from '../../context/SidebarContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -14,12 +16,20 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
   const { isCollapsed } = useSidebar();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { signOut } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const notifications = [
     { id: '1', title: 'New update available', message: 'Equilibria v1.2 is now available with new features', time: '2 min ago', read: false, type: 'info' },
     { id: '2', title: 'Server maintenance', message: 'Scheduled maintenance in 24 hours', time: '1 hour ago', read: false, type: 'warning' },
     { id: '3', title: 'Project milestone reached', message: 'Alpha phase completed successfully', time: '3 hours ago', read: true, type: 'success' },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="bg-white/80 dark:bg-surface-800/80 backdrop-blur-sm border-b border-surface-200 dark:border-surface-700 sticky top-0 z-30 transition-all duration-200">
@@ -128,11 +138,11 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
               className="flex items-center gap-2 ml-1 p-1 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700"
             >
               <img 
-                src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+                src={user?.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.displayName || user?.email || 'User') + '&background=random'}
                 alt="User profile" 
                 className="w-8 h-8 rounded-full object-cover"
               />
-              <span className="font-medium text-sm hidden lg:block">John Doe</span>
+              <span className="font-medium text-sm hidden lg:block">{user?.displayName || user?.email || 'User'}</span>
             </button>
             
             <AnimatePresence>
@@ -147,13 +157,13 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
                   <div className="p-4 border-b border-surface-200 dark:border-surface-700">
                     <div className="flex items-center gap-3">
                       <img 
-                        src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+                        src={user?.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.displayName || user?.email || 'User') + '&background=random'}
                         alt="User profile" 
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <div>
-                        <h3 className="font-semibold">John Doe</h3>
-                        <p className="text-xs text-surface-600 dark:text-surface-400">Administrator</p>
+                        <h3 className="font-semibold">{user?.displayName || user?.email || 'User'}</h3>
+                        <p className="text-xs text-surface-600 dark:text-surface-400">{user?.email}</p>
                       </div>
                     </div>
                   </div>
@@ -170,7 +180,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar, isSidebarOpen }) => {
                   </div>
                   
                   <div className="p-2 border-t border-surface-200 dark:border-surface-700">
-                    <button className="w-full flex items-center justify-center gap-2 p-2 text-sm bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600">
+                    <button 
+                      onClick={handleSignOut}
+                      className="w-full flex items-center justify-center gap-2 p-2 text-sm bg-surface-100 dark:bg-surface-700 rounded-lg hover:bg-surface-200 dark:hover:bg-surface-600"
+                    >
                       Sign out
                     </button>
                   </div>

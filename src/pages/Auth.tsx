@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, User, Phone, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,15 +10,17 @@ const Auth: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    firstName: '',
-    lastName: '',
-    phoneNumber: '',
-    dateOfBirth: '',
   });
-  const [error, setError] = useState('');
+  const location = useLocation();
+  const urlError = new URLSearchParams(location.search).get('error');
+  const [error, setError] = useState(urlError || '');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { signIn, signUp, signInWithGoogle } = useAuth();
+
+  useEffect(() => {
+    setError(urlError || '');
+  }, [urlError]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -35,23 +37,26 @@ const Auth: React.FC = () => {
     try {
       if (isLogin) {
         await signIn(formData.email, formData.password);
-        navigate('/dashboard');
       } else {
-        // Validate required fields for signup
-        if (!formData.firstName || !formData.lastName) {
-          throw new Error('First name and last name are required');
-        }
-        
-        await signUp(formData.email, formData.password, {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phoneNumber: formData.phoneNumber,
-          dateOfBirth: formData.dateOfBirth,
-        });
-        navigate('/dashboard');
+        await signUp(formData.email, formData.password);
       }
+      navigate('/dashboard');
     } catch (error: any) {
-      setError(error.message || 'An error occurred');
+      let message = 'An error occurred. Please try again.';
+      if (error.code === 'auth/user-not-found') {
+        message = 'No user found with this email.';
+      } else if (error.code === 'auth/wrong-password') {
+        message = 'Incorrect password.';
+      } else if (error.code === 'auth/email-already-in-use') {
+        message = 'This email is already registered.';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'Invalid email address.';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Password should be at least 6 characters.';
+      } else if (error.message) {
+        message = error.message;
+      }
+      navigate(`/auth?error=${encodeURIComponent(message)}`);
     } finally {
       setIsLoading(false);
     }
@@ -146,72 +151,18 @@ const Auth: React.FC = () => {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-error-500/10 border border-error-500/20 rounded-xl text-white flex items-center gap-2">
-              <AlertCircle size={18} />
-              <span>{error}</span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-red-600/90 border border-red-700 rounded-xl text-white flex items-center gap-2 shadow-lg"
+            >
+              <AlertCircle size={20} className="text-white" />
+              <span className="font-semibold">{error}</span>
+            </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60\" size={20} />
-                    <input
-                      type="text"
-                      name="firstName"
-                      placeholder="First name"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                      required={!isLogin}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
-                    <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Last name"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                      required={!isLogin}
-                      disabled={isLoading}
-                    />
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    placeholder="Phone number (optional)"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    placeholder="Date of birth (optional)"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-10 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50"
-                    disabled={isLoading}
-                  />
-                </div>
-              </>
-            )}
-
+            {/* Only show email and password fields for both login and signup */}
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
               <input
@@ -225,7 +176,6 @@ const Auth: React.FC = () => {
                 disabled={isLoading}
               />
             </div>
-
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60" size={20} />
               <input
@@ -246,7 +196,6 @@ const Auth: React.FC = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-
             <button
               type="submit"
               disabled={isLoading}

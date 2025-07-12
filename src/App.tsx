@@ -50,7 +50,6 @@ const AppContent: React.FC = () => {
         
         <main className={`flex-1 transition-all duration-150 ease-in-out ${isSidebarOpen ? (isCollapsed ? 'lg:ml-16' : 'lg:ml-64') : 'lg:ml-16'}`}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/academic" element={<Academic />} />
@@ -59,6 +58,7 @@ const AppContent: React.FC = () => {
             <Route path="/goals" element={<Goals />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
